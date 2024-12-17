@@ -1,4 +1,8 @@
-const { excel_oku, excel_olustur } = require("./helpers.js");
+const {
+  excel_oku,
+  excel_olustur,
+  toplam_formulu_kullan,
+} = require("./helpers.js");
 const ExcelJS = require("exceljs");
 const dosya_adi = "Tablolar/Ders-Değerlendirme İlişkisi.xlsx";
 
@@ -17,31 +21,13 @@ async function main() {
     },
   ];
 
-  for (let i = 0; i < ders_ciktilari.length; i++) {
+  for (let i = 1; i < ders_ciktilari.length; i++) {
     const ders = ders_ciktilari[i];
     data.push({ "Ders Çıktıları/Değerlendirme": ders["Öğrenme Çıktısı"] });
   }
 
   await excel_olustur(basliklar, data, dosya_adi);
-
-  const workbook = new ExcelJS.Workbook();
-  await workbook.xlsx.readFile(dosya_adi);
-
-  const worksheet = workbook.worksheets[0]; // İlk sayfayı seç
-  const toplamColumn = basliklar.indexOf("Toplam") + 1; // "Toplam" sütununun indeksini al
-  const startColumn = 2; // B sütunundan başla
-  const endColumn = toplamColumn - 1; // "Toplam" sütunundan bir önceki sütuna kadar
-
-  // Satır bazında formül ekleme
-  for (let i = 2; i <= worksheet.rowCount; i++) {
-    worksheet.getCell(i, toplamColumn).value = {
-      formula: `SUM(${String.fromCharCode(
-        64 + startColumn
-      )}${i}:${String.fromCharCode(64 + endColumn)}${i})`,
-    };
-  }
-
-  await workbook.xlsx.writeFile(dosya_adi);
+  await toplam_formulu_kullan(dosya_adi, basliklar);
 }
 
 main();

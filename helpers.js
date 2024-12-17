@@ -1,6 +1,6 @@
 const ExcelJS = require("exceljs");
 
-async function excel_oku(dosya_adi) {
+async function excel_oku(dosya_adi, baslik_satiri = 1) {
   const workbook = new ExcelJS.Workbook();
   await workbook.xlsx.readFile(dosya_adi);
 
@@ -9,11 +9,11 @@ async function excel_oku(dosya_adi) {
 
   // Sayfadaki verileri oku
   worksheet.eachRow((row, rowNumber) => {
-    if (rowNumber > 1) {
+    if (rowNumber > 0) {
       // Başlık satırını atla
       const rowData = {};
       row.eachCell((cell, colNumber) => {
-        const header = worksheet.getRow(1).getCell(colNumber).value; // Başlıklar
+        const header = worksheet.getRow(baslik_satiri).getCell(colNumber).value; // Başlıklar
         rowData[header] = cell.value;
       });
       data.push(rowData);
@@ -67,7 +67,29 @@ async function excel_olustur(basliklar, data, dosya_adi, formul = false) {
   console.log("Excel dosyası oluşturuldu ve formüller eklendi.");
 }
 
+async function toplam_formulu_kullan(dosya_adi, basliklar) {
+  const workbook = new ExcelJS.Workbook();
+  await workbook.xlsx.readFile(dosya_adi);
+
+  const worksheet = workbook.worksheets[0]; // İlk sayfayı seç
+  const toplamColumn = basliklar.indexOf("Toplam") + 1; // "Toplam" sütununun indeksini al
+  const startColumn = 2; // B sütunundan başla
+  const endColumn = toplamColumn - 1; // "Toplam" sütunundan bir önceki sütuna kadar
+
+  // Satır bazında formül ekleme
+  for (let i = 2; i <= worksheet.rowCount; i++) {
+    worksheet.getCell(i, toplamColumn).value = {
+      formula: `SUM(${String.fromCharCode(
+        64 + startColumn
+      )}${i}:${String.fromCharCode(64 + endColumn)}${i})`,
+    };
+  }
+
+  await workbook.xlsx.writeFile(dosya_adi);
+}
+
 module.exports = {
   excel_oku,
   excel_olustur,
+  toplam_formulu_kullan,
 };

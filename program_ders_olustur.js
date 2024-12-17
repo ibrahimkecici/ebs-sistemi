@@ -9,7 +9,7 @@ async function main() {
   let basliklar = ["Program Çıktıları / Öğrenme Çıktıları"];
   let data = [];
 
-  for (let i = 0; i < ders_ciktilari.length; i++) {
+  for (let i = 1; i < ders_ciktilari.length; i++) {
     const ders = ders_ciktilari[i];
     basliklar.push(ders["Öğrenme Çıktısı"]);
     const program = program_ciktilari[i];
