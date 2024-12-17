@@ -23,7 +23,7 @@ async function excel_oku(dosya_adi) {
   return data;
 }
 
-async function excel_olustur(basliklar, data, dosya_adi) {
+async function excel_olustur(basliklar, data, dosya_adi, formul = false) {
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet("Tablo 1");
 
@@ -48,15 +48,18 @@ async function excel_olustur(basliklar, data, dosya_adi) {
   });
 
   // Formülü "İlişki Değeri" sütununa ekle
-  const relationColumn = basliklar.length; // İlişki Değeri sütununun indeksi
-  for (let i = 2; i <= worksheet.rowCount; i++) {
-    worksheet.getCell(i, relationColumn).value = {
-      formula: `SUM(B${i}:${String.fromCharCode(
-        65 + relationColumn - 2
-      )}${i}) / COUNTA(B${i}:${String.fromCharCode(
-        65 + relationColumn - 2
-      )}${i})`,
-    };
+  if (formul) {
+    const relationColumn = basliklar.length;
+
+    for (let i = 2; i <= worksheet.rowCount; i++) {
+      worksheet.getCell(i, relationColumn).value = {
+        formula: `SUM(B${i}:${String.fromCharCode(
+          65 + relationColumn - 2
+        )}${i}) / COUNTA(B${i}:${String.fromCharCode(
+          65 + relationColumn - 2
+        )}${i})`,
+      };
+    }
   }
 
   // Excel dosyasını kaydet
@@ -64,27 +67,7 @@ async function excel_olustur(basliklar, data, dosya_adi) {
   console.log("Excel dosyası oluşturuldu ve formüller eklendi.");
 }
 
-// Ana işlem
-async function main() {
-  const notlar = await excel_oku("notlar.xlsx");
-  const ders_ciktilari = await excel_oku("ders_ciktilari.xlsx");
-  const program_ciktilari = await excel_oku("program_ciktilari.xlsx");
-
-  let basliklar = ["Program Çıktıları / Öğrenme Çıktıları"];
-  let data = [];
-
-  for (let i = 0; i < ders_ciktilari.length; i++) {
-    const ders = ders_ciktilari[i];
-    basliklar.push(ders["Öğrenme Çıktısı"]);
-    const program = program_ciktilari[i];
-
-    if (program) {
-      data.push(Object.assign({}, program, { [ders["Öğrenme Çıktısı"]]: "" }));
-    }
-  }
-
-  basliklar.push("İlişki Değeri");
-  await excel_olustur(basliklar, data, "test.xlsx");
-}
-
-main();
+module.exports = {
+  excel_oku,
+  excel_olustur,
+};
