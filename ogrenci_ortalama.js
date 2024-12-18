@@ -14,35 +14,47 @@ async function main() {
 
   // Başlıkları oluştur
   const ders_basliklari = Object.keys(agirlikli_degerlendirme[0]).filter(
-    (key) => key !== "Ders Çıktı"
+    (key) => key !== "Ders Çıktıları /Değerlendirme" && key !== "Toplam"
   );
-  const basliklar = ["Ders Çıktı", ...ders_basliklari, "MAX", "%BAŞARI"];
+  const basliklar = [
+    "Ders Çıktı",
+    ...ders_basliklari,
+    "Toplam",
+    "MAX",
+    "%BAŞARI",
+  ];
 
   let data = [];
 
   // Her öğrenci için ağırlıklı not hesapla
-  for (let i = 0; i < ogrenci_not_tablosu.length; i++) {
+  for (let i = 1; i < ogrenci_not_tablosu.length; i++) {
     const ogrenci = ogrenci_not_tablosu[i];
+    data.push({});
+    data.push({ "Ders Çıktı": "Öğrenci NO: " + ogrenci.Ogrenci_No });
     const notlar = {};
 
-    for (let j = 0; j < agirlikli_degerlendirme.length; j++) {
+    for (let j = 1; j < agirlikli_degerlendirme.length; j++) {
       const degerlendirme = agirlikli_degerlendirme[j];
-      const ders_cikti = degerlendirme["Ders Çıktı"];
+      const ders_cikti = degerlendirme["Ders Çıktıları /Değerlendirme"];
       notlar["Ders Çıktı"] = ders_cikti;
 
       let toplam = 0;
+      let max = 0;
       ders_basliklari.forEach((ders) => {
         const agirlik = degerlendirme[ders];
-        const ogrenci_notu = ogrenci[ders]?.result || 0; // Eğer not yoksa 0 kabul edilir
+        const ogrenci_notu = ogrenci[ders] || 0; // Eğer not yoksa 0 kabul edilir
         const agirlikli_not = ogrenci_notu * agirlik;
         toplam += agirlikli_not;
+        max += agirlik * 100;
         notlar[ders] = agirlikli_not.toFixed(2); // Ondalık sayıyı düzenle
       });
 
-      notlar["MAX"] = toplam.toFixed(2); // Toplam not
-      notlar["%BAŞARI"] = ((toplam / 100) * 100).toFixed(2); // Başarı yüzdesi
+      notlar["Toplam"] = toplam.toFixed(2);
+      notlar["MAX"] = max.toFixed(2); // Toplam not
+      notlar["%BAŞARI"] = max == 0 ? 0 : ((toplam / max) * 100).toFixed(2); // Başarı yüzdesi
       data.push({ ...notlar });
     }
+    console.log(notlar);
   }
 
   // Excel dosyasını oluştur
