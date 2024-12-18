@@ -9,12 +9,14 @@ const dosya_adi = "Tablolar/Ders-Değerlendirme İlişkisi.xlsx";
 async function main() {
   const ders_ciktilari = await excel_oku("Tablolar/ders_ciktilari.xlsx");
 
-  let basliklar = ["Etki Oranları", "10", "20", "30", "40", "Toplam"];
+  let basliklar = ["Etki Oranları", "5", "5", "10", "10", "30", "40", "Toplam"];
   let data = [
     {
       "Ders Çıktıları/Değerlendirme": "Ders Çıktıları /Değerlendirme",
-      Ödev1: "Ödev 1",
+      Ödev1: "Ödev1",
+      Ödev2: "Ödev2",
       Quiz: "Quiz",
+      Quiz4: "Quiz4",
       Vize: "Vize",
       Final: "Final",
       Toplam: "Toplam",
