@@ -3,8 +3,8 @@ const { excel_oku, excel_olustur } = require("./helpers.js");
 // Ana işlem
 async function main() {
   const notlar = await excel_oku("Tablolar/Öğrenci Not Tablosu.xlsx");
-  const ders_ciktilari = await excel_oku("Tablolar/ders_ciktilari.xlsx");
-  const program_ciktilari = await excel_oku("Tablolar/program_ciktilari.xlsx");
+  const ders_ciktilari = await excel_oku("Tablolar/Ders Çıktıları.xlsx");
+  const program_ciktilari = await excel_oku("Tablolar/Program Çıktıları.xlsx");
 
   let basliklar = ["Program Çıktıları / Öğrenme Çıktıları"];
   let data = [];
@@ -20,12 +20,7 @@ async function main() {
   }
 
   basliklar.push("İlişki Değeri");
-  await excel_olustur(
-    basliklar,
-    data,
-    "Tablolar/Program-Ders İlişkisi.xlsx",
-    true
-  );
+  await excel_olustur(basliklar, data, "Tablolar/Tablo 1.xlsx", true);
 }
 
 main();

@@ -4,10 +4,10 @@ const {
   toplam_formulu_kullan,
 } = require("./helpers.js");
 const ExcelJS = require("exceljs");
-const dosya_adi = "Tablolar/Ders-Değerlendirme İlişkisi.xlsx";
+const dosya_adi = "Tablolar/Tablo 2.xlsx";
 
 async function main() {
-  const ders_ciktilari = await excel_oku("Tablolar/ders_ciktilari.xlsx");
+  const ders_ciktilari = await excel_oku("Tablolar/Ders Çıktıları.xlsx");
 
   let basliklar = ["Etki Oranları", "5", "5", "10", "10", "30", "40", "Toplam"];
   let data = [

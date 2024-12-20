@@ -5,11 +5,11 @@ const {
   toplam_formulu_kullan,
 } = require("./helpers.js");
 
-const dosya_adi = "Tablolar/Ağırlıklı Değerlendirme.xlsx";
+const dosya_adi = "Tablolar/Tablo 3.xlsx";
 
 async function main() {
   const ders_degerlendirme_iliskisi = await excel_oku(
-    "Tablolar/Ders-Değerlendirme İlişkisi.xlsx",
+    "Tablolar/Tablo 2.xlsx",
     2
   );
 

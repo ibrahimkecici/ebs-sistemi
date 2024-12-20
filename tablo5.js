@@ -1,16 +1,14 @@
 const ExcelJS = require("exceljs");
 const { excel_oku, excel_olustur, harfler } = require("./helpers.js");
 
-const dosya_adi = "Tablolar/Öğrenci Başarı Tablosu.xlsx";
+const dosya_adi = "Tablolar/Tablo 5.xlsx";
 
 async function main() {
-  const ders_ciktilari_excel = await excel_oku("Tablolar/ders_ciktilari.xlsx");
+  const ders_ciktilari_excel = await excel_oku("Tablolar/Ders Çıktıları.xlsx");
   const program_ciktilari_excel = await excel_oku(
-    "Tablolar/program_ciktilari.xlsx"
+    "Tablolar/Program Çıktıları.xlsx"
   );
-  const program_iliski_excel = await excel_oku(
-    "Tablolar/Program-Ders İlişkisi.xlsx"
-  );
+  const program_iliski_excel = await excel_oku("Tablolar/Tablo 1.xlsx");
 
   let program_iliski = [];
   for (let i = 1; i < program_iliski_excel.length; i++) {
@@ -36,7 +34,7 @@ async function main() {
   }
 
   const ogrencilerin_not_ortalamalari = await excel_oku(
-    "Tablolar/Öğrencilerin_Not_Ortalamalari.xlsx"
+    "Tablolar/Tablo 4.xlsx"
   );
 
   let basliklar = ["", "Ders Çıktısı"];

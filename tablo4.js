@@ -1,13 +1,11 @@
 const ExcelJS = require("exceljs");
 const { excel_oku, excel_olustur } = require("./helpers.js");
 
-const dosya_adi = "Tablolar/Öğrencilerin_Not_Ortalamalari.xlsx";
+const dosya_adi = "Tablolar/Tablo 4.xlsx";
 
 async function main() {
   // Ağırlıklı değerlendirme ve öğrenci not tablosunu oku
-  const agirlikli_degerlendirme = await excel_oku(
-    "Tablolar/Ağırlıklı Değerlendirme.xlsx"
-  );
+  const agirlikli_degerlendirme = await excel_oku("Tablolar/Tablo 3.xlsx");
   const ogrenci_not_tablosu = await excel_oku(
     "Tablolar/Öğrenci Not Tablosu.xlsx"
   );
