@@ -1,5 +1,5 @@
 const ExcelJS = require("exceljs");
-const { excel_oku, excel_olustur } = require("./helpers.js");
+const { excel_oku, excel_olustur, harfler } = require("./helpers.js");
 
 const dosya_adi = "Tablolar/Öğrenci Başarı Tablosu.xlsx";
 
@@ -11,6 +11,7 @@ async function main() {
   const program_iliski_excel = await excel_oku(
     "Tablolar/Program-Ders İlişkisi.xlsx"
   );
+
   let program_iliski = [];
   for (let i = 1; i < program_iliski_excel.length; i++) {
     const iliski = program_iliski_excel[i];
@@ -41,8 +42,6 @@ async function main() {
   let basliklar = ["", "Ders Çıktısı"];
   let data = [];
 
-  let harfler = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
-
   let ogrenciler = [];
 
   for (
@@ -67,6 +66,7 @@ async function main() {
   for (let i = 0; i < ogrenciler.length; i++) {
     const ogrenci = ogrenciler[i];
     const satirbaslik = { A: "Program Çıktısı" };
+    if (i != 0) data.push({});
     data.push({ A: ogrenci.ogrenci_no });
     for (let j = 0; j < ogrenci.basari_orani.length; j++) {
       const ogrencibasari = ogrenci.basari_orani[j];
@@ -79,19 +79,54 @@ async function main() {
       const prgcikti = program_ciktilari[k];
 
       let basariliski = { A: prgcikti };
+      let toplam = 0;
       for (let m = 0; m < ogrenci.basari_orani.length; m++) {
         const basariorani = ogrenci.basari_orani[m];
 
         if (m + 1 < ogrenci.basari_orani.length) {
           // console.log(program_iliski[m][k + 1] * basariorani);
         }
-        basariliski[harfler[m + 2]] = program_iliski[m][k + 1] * basariorani;
+        const program = program_iliski[k];
+        console.log(program);
+        if (program) {
+          basariliski[harfler[m + 2]] = basariorani * program[m + 1];
+          toplam += basariorani * program[m + 1];
+        }
       }
+      const ortalama = toplam / ogrenci.basari_orani.length;
+      const iliski_degeri = program_iliski[k][program_iliski[k].length - 1];
+      if (iliski_degeri == 0) {
+        basariliski[harfler[ogrenci.basari_orani.length + 2]] = 0;
+      } else
+        basariliski[harfler[ogrenci.basari_orani.length + 2]] =
+          ortalama / iliski_degeri;
       data.push(basariliski);
     }
   }
 
   await excel_olustur(basliklar, data, dosya_adi);
+
+  const workbook = new ExcelJS.Workbook();
+  await workbook.xlsx.readFile(dosya_adi);
+
+  const worksheet = workbook.worksheets[0]; // İlk sayfayı seç
+
+  const baslik_harf_sonu = harfler[ders_ciktilari_sayisi];
+  worksheet.mergeCells(`B1:${baslik_harf_sonu}1`);
+  const mergedCell = worksheet.getCell("B1");
+  mergedCell.value = "Ders Çıktısı";
+  mergedCell.alignment = { vertical: "middle", horizontal: "center" };
+
+  console.log(worksheet.columns[0]);
+  worksheet.columns[0].width = 35; // Sütun genişliği
+  worksheet.columns[0].alignment = {
+    wrapText: true,
+    vertical: "middle",
+    horizontal: "center",
+  };
+
+  await workbook.xlsx.writeFile(dosya_adi);
+  console.log("Excel dosyası başarıyla oluşturuldu:", dosya_adi);
 }
 
 main().catch((err) => {

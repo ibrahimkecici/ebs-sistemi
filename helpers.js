@@ -1,4 +1,5 @@
 const ExcelJS = require("exceljs");
+let harfler = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
 async function excel_oku(dosya_adi, baslik_satiri = 1) {
   const workbook = new ExcelJS.Workbook();
@@ -92,4 +93,5 @@ module.exports = {
   excel_oku,
   excel_olustur,
   toplam_formulu_kullan,
+  harfler,
 };
