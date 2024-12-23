@@ -35,6 +35,7 @@ async function main() {
   const basliklar = [...Object.keys(data[0]), "Toplam"];
 
   await excel_olustur(basliklar, data, dosya_adi);
+  console.log(`Yeni Excel dosyası oluşturuldu: ${dosya_adi}`);
 
   await toplam_formulu_kullan(dosya_adi, basliklar);
 }

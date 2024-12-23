@@ -52,7 +52,6 @@ async function main() {
       notlar["%BAŞARI"] = max == 0 ? 0 : ((toplam / max) * 100).toFixed(2); // Başarı yüzdesi
       data.push({ ...notlar });
     }
-    console.log(notlar);
   }
 
   // Excel dosyasını oluştur

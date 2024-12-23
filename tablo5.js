@@ -17,8 +17,7 @@ async function main() {
       Object.values(iliski).map((prgiliski) => {
         if (typeof prgiliski == "object") {
           return prgiliski.result || 0;
-        } else;
-        {
+        } else {
           return prgiliski;
         }
       })
@@ -81,11 +80,8 @@ async function main() {
       for (let m = 0; m < ogrenci.basari_orani.length; m++) {
         const basariorani = ogrenci.basari_orani[m];
 
-        if (m + 1 < ogrenci.basari_orani.length) {
-          // console.log(program_iliski[m][k + 1] * basariorani);
-        }
         const program = program_iliski[k];
-        console.log(program);
+
         if (program) {
           basariliski[harfler[m + 2]] = basariorani * program[m + 1];
           toplam += basariorani * program[m + 1];
@@ -115,7 +111,6 @@ async function main() {
   mergedCell.value = "Ders Çıktısı";
   mergedCell.alignment = { vertical: "middle", horizontal: "center" };
 
-  console.log(worksheet.columns[0]);
   worksheet.columns[0].width = 35; // Sütun genişliği
   worksheet.columns[0].alignment = {
     wrapText: true,
