@@ -4,13 +4,11 @@ const { excel_oku, excel_olustur } = require("./helpers.js");
 const dosya_adi = "Tablolar/Tablo 4.xlsx";
 
 async function main() {
-  // Ağırlıklı değerlendirme ve öğrenci not tablosunu oku
   const agirlikli_degerlendirme = await excel_oku("Tablolar/Tablo 3.xlsx");
   const ogrenci_not_tablosu = await excel_oku(
     "Tablolar/Öğrenci Not Tablosu.xlsx"
   );
 
-  // Başlıkları oluştur
   const ders_basliklari = Object.keys(agirlikli_degerlendirme[0]).filter(
     (key) => key !== "Ders Çıktıları /Değerlendirme" && key !== "Toplam"
   );
@@ -54,12 +52,16 @@ async function main() {
     }
   }
 
-  // Excel dosyasını oluştur
   await excel_olustur(basliklar, data, dosya_adi);
 
   console.log(`Yeni Excel dosyası oluşturuldu: ${dosya_adi}`);
 }
 
-main().catch((err) => {
-  console.error("Hata oluştu:", err);
-});
+// Eğer bu dosya node.js ile çalıştırılıyorsa main fonksiyonunu çalıştır
+if (require.main == module) {
+  main().catch((err) => {
+    console.error("Hata oluştu:", err);
+  });
+}
+
+module.exports = { main };

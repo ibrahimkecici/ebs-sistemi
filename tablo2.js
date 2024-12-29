@@ -10,6 +10,8 @@ async function main() {
   const ders_ciktilari = await excel_oku("Tablolar/Ders Çıktıları.xlsx");
 
   let basliklar = ["Etki Oranları", "5", "5", "10", "10", "30", "40", "Toplam"];
+
+  // İlk satır verilerinin tanımlanması
   let data = [
     {
       "Ders Çıktıları/Değerlendirme": "Ders Çıktıları /Değerlendirme",
@@ -23,6 +25,7 @@ async function main() {
     },
   ];
 
+  // Ders çıktılarının tabloya eklenmesi
   for (let i = 1; i < ders_ciktilari.length; i++) {
     const ders = ders_ciktilari[i];
     data.push({ "Ders Çıktıları/Değerlendirme": ders["Öğrenme Çıktısı"] });
@@ -33,4 +36,9 @@ async function main() {
   await toplam_formulu_kullan(dosya_adi, basliklar);
 }
 
-main();
+// Eğer bu dosya node.js ile çalıştırılıyorsa main fonksiyonunu çalıştır
+if (require.main == module) {
+  main();
+}
+
+module.exports = { main };

@@ -10,6 +10,7 @@ async function main() {
   );
   const program_iliski_excel = await excel_oku("Tablolar/Tablo 1.xlsx");
 
+  // Program ilişki matrisinin işlenmesi
   let program_iliski = [];
   for (let i = 1; i < program_iliski_excel.length; i++) {
     const iliski = program_iliski_excel[i];
@@ -24,9 +25,11 @@ async function main() {
     );
   }
 
+  // Ders çıktıları sayısının belirlenmesi
   const ders_ciktilari_sayisi = ders_ciktilari_excel.length - 1;
   let program_ciktilari = [];
 
+  // Program çıktılarının diziye aktarılması
   for (let i = 1; i < program_ciktilari_excel.length; i++) {
     const program_ciktisi = program_ciktilari_excel[i];
     program_ciktilari.push(...Object.values(program_ciktisi));
@@ -41,6 +44,7 @@ async function main() {
 
   let ogrenciler = [];
 
+  // Her öğrenci için ders çıktılarına göre başarı oranlarının hesaplanması
   for (
     let i = 1;
     i < ogrencilerin_not_ortalamalari.length;
@@ -53,18 +57,22 @@ async function main() {
         ...ogrencilerin_not_ortalamalari
           .slice(i + 1, i + ders_ciktilari_sayisi + 1)
           .map((not) => {
-            //her birini sırayla dönmek için map kullandık.
+            // Her birini sırayla dönmek için map kullanılması.
             return not["%BAŞARI"];
           }),
       ],
     });
   }
 
+  // Her öğrenci için veri satırlarının oluşturulması
   for (let i = 0; i < ogrenciler.length; i++) {
     const ogrenci = ogrenciler[i];
     const satirbaslik = { A: "Program Çıktısı" };
+    // Boş satır ekle
     if (i != 0) data.push({});
     data.push({ A: ogrenci.ogrenci_no });
+
+    // Her ders çıktısı için başarı oranlarının satırlara eklenmesi
     for (let j = 0; j < ogrenci.basari_orani.length; j++) {
       const ogrencibasari = ogrenci.basari_orani[j];
       satirbaslik[harfler[j + 1]] = ogrencibasari;
@@ -72,23 +80,30 @@ async function main() {
     satirbaslik[harfler[ogrenci.basari_orani.length + 1]] = "Başarı Oranı";
     data.push(satirbaslik);
 
+    // Program çıktıları için hesaplama döngüsü
     for (let k = 0; k < program_ciktilari.length; k++) {
       const prgcikti = program_ciktilari[k];
 
       let basariliski = { A: prgcikti };
       let toplam = 0;
+
+      // Ders çıktıları ile program çıktıları arasındaki ilişkinin hesaplanması
       for (let m = 0; m < ogrenci.basari_orani.length; m++) {
         const basariorani = ogrenci.basari_orani[m];
 
         const program = program_iliski[k];
 
+        // Program ilişki matrisinden değerlerin alınması ve hesaplanması
         if (program) {
           basariliski[harfler[m + 2]] = basariorani * program[m + 1];
           toplam += basariorani * program[m + 1];
         }
       }
+      // Ortalama başarı oranının hesaplanması
       const ortalama = toplam / ogrenci.basari_orani.length;
       const iliski_degeri = program_iliski[k][program_iliski[k].length - 1];
+
+      // İlişki değerine göre başarı oranının hesaplanması
       if (iliski_degeri == 0) {
         basariliski[harfler[ogrenci.basari_orani.length + 2]] = 0;
       } else
@@ -122,6 +137,11 @@ async function main() {
   console.log("Excel dosyası başarıyla oluşturuldu:", dosya_adi);
 }
 
-main().catch((err) => {
-  console.error("Hata oluştu:", err);
-});
+// Eğer bu dosya node.js ile çalıştırılıyorsa main fonksiyonunu çalıştır
+if (require.main == module) {
+  main().catch((err) => {
+    console.error("Hata oluştu:", err);
+  });
+}
+
+module.exports = { main };
