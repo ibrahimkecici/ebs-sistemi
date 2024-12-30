@@ -1,6 +1,24 @@
 const ExcelJS = require("exceljs");
 let harfler = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
+require("dotenv").config();
+
+const { exec } = require("child_process");
+
+// Dosyayı aç
+function dosya_ac(dosya_adi) {
+  console.log(process.env.MODE);
+  if (process.env.MODE != "test") {
+    exec(`open "${dosya_adi}"`, (err) => {
+      if (err) {
+        console.error(`Dosya açılamadı: ${err.message}`);
+      } else {
+        console.log(`Dosya başarıyla açıldı: ${dosya_adi}`);
+      }
+    });
+  }
+}
+
 async function excel_oku(dosya_adi, baslik_satiri = 1) {
   const workbook = new ExcelJS.Workbook();
   await workbook.xlsx.readFile(dosya_adi);
@@ -65,7 +83,6 @@ async function excel_olustur(basliklar, data, dosya_adi, formul = false) {
 
   // Excel dosyasını kaydet
   await workbook.xlsx.writeFile(dosya_adi);
-  console.log("Excel dosyası oluşturuldu ve formüller eklendi.");
 }
 
 async function toplam_formulu_kullan(dosya_adi, basliklar) {
@@ -94,4 +111,5 @@ module.exports = {
   excel_olustur,
   toplam_formulu_kullan,
   harfler,
+  dosya_ac,
 };

@@ -1,5 +1,5 @@
 const ExcelJS = require("exceljs");
-const { excel_oku, excel_olustur, harfler } = require("./helpers.js");
+const { excel_oku, excel_olustur, harfler, dosya_ac } = require("./helpers.js");
 
 const dosya_adi = "Tablolar/Tablo 5.xlsx";
 
@@ -135,6 +135,8 @@ async function main() {
 
   await workbook.xlsx.writeFile(dosya_adi);
   console.log("Excel dosyası başarıyla oluşturuldu:", dosya_adi);
+
+  dosya_ac(dosya_adi);
 }
 
 // Eğer bu dosya node.js ile çalıştırılıyorsa main fonksiyonunu çalıştır

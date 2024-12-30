@@ -1,4 +1,4 @@
-const { excel_oku, excel_olustur } = require("./helpers.js");
+const { excel_oku, excel_olustur, dosya_ac } = require("./helpers.js");
 
 async function main() {
   const ders_ciktilari = await excel_oku("Tablolar/Ders Çıktıları.xlsx");
@@ -25,6 +25,8 @@ async function main() {
   // Yeni Excel dosyasının oluşturulması
   await excel_olustur(basliklar, data, "Tablolar/Tablo 1.xlsx", true);
   console.log(`Yeni Excel dosyası oluşturuldu: ${dosya_adi}`);
+
+  dosya_ac(dosya_adi);
 }
 
 // Script doğrudan çalıştırıldığında main fonksiyonunu çağır

@@ -2,6 +2,7 @@ const {
   excel_oku,
   excel_olustur,
   toplam_formulu_kullan,
+  dosya_ac,
 } = require("./helpers.js");
 const ExcelJS = require("exceljs");
 const dosya_adi = "Tablolar/Tablo 2.xlsx";
@@ -34,6 +35,8 @@ async function main() {
   await excel_olustur(basliklar, data, dosya_adi);
   console.log(`Yeni Excel dosyası oluşturuldu: ${dosya_adi}`);
   await toplam_formulu_kullan(dosya_adi, basliklar);
+
+  dosya_ac(dosya_adi);
 }
 
 // Eğer bu dosya node.js ile çalıştırılıyorsa main fonksiyonunu çalıştır
