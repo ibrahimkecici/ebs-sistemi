@@ -7,7 +7,6 @@ const { exec } = require("child_process");
 
 // Dosyayı aç
 function dosya_ac(dosya_adi) {
-  console.log(process.env.MODE);
   if (process.env.MODE != "test") {
     exec(`open "${dosya_adi}"`, (err) => {
       if (err) {
