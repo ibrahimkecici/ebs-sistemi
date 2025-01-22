@@ -411,54 +411,101 @@ const Tables: React.FC = () => {
         break;
       case 3:
         if (ogrenciDersBasari.length > 0) {
-          // Get unique ders çıktıları for rows
-          const dersCiktilari = Array.from(
-            new Set(
-              ogrenciDersBasari.map((item) => ({
-                id: item.ders_ciktisi_id,
-                cikti: item.ders_ciktisi,
-              }))
-            )
-          );
+          interface Student {
+            ogrenci_no: string;
+            ogrenci_adi: string;
+            ogrenci_soyadi: string;
+          }
+
+          interface DersCiktisi {
+            id: string;
+            cikti: string;
+          }
+
+          // Get unique students using object keys
+          const studentsMap = ogrenciDersBasari.reduce((acc, item) => {
+            const key = `${item.ogrenci_no}`;
+            if (!acc[key]) {
+              acc[key] = {
+                ogrenci_no: item.ogrenci_no,
+                ogrenci_adi: item.ogrenci_adi,
+                ogrenci_soyadi: item.ogrenci_soyadi,
+              };
+            }
+            return acc;
+          }, {} as Record<string, Student>);
+
+          const students = Object.values(studentsMap) as Student[];
 
           // Get unique değerlendirme kriterleri for columns
           const kriterler = Array.from(
             new Set(ogrenciDersBasari.map((item) => item.kriter_adi))
           );
 
-          // Transform into rows
-          data = dersCiktilari.map((dersCiktisi) => {
-            const row: any = {
-              ders_ciktisi_id: dersCiktisi.id,
-              ders_ciktisi: dersCiktisi.cikti,
-            };
-
-            let totalValue = 0;
-            let maxTotalValue = 0;
-
-            kriterler.forEach((kriter) => {
-              const match = ogrenciDersBasari.find(
-                (item) =>
-                  item.ders_ciktisi_id === dersCiktisi.id &&
-                  item.kriter_adi === kriter
-              );
-              if (match) {
-                const value = Number(match.deger) || 0;
-                const maxValue = Number(match.maxDeger) || 0;
-                row[kriter] = value / 100;
-                totalValue += value / 100;
-                maxTotalValue += maxValue / 100;
-              } else {
-                row[kriter] = 0;
-              }
+          // Transform into rows with student headers
+          data = [];
+          students.forEach((student) => {
+            // Add student header row
+            data.push({
+              isHeader: true,
+              ogrenci_no: student.ogrenci_no,
+              ogrenci_adi: student.ogrenci_adi,
+              ogrenci_soyadi: student.ogrenci_soyadi,
             });
 
-            row.total = Number(totalValue);
-            row.max = Number(maxTotalValue);
-            row.basariOrani =
-              maxTotalValue > 0 ? (totalValue / maxTotalValue) * 100 : 0;
+            // Get unique ders çıktıları for this student using object keys
+            const dersCiktilariMap = ogrenciDersBasari
+              .filter((item) => item.ogrenci_no === student.ogrenci_no)
+              .reduce((acc, item) => {
+                const key = `${item.ders_ciktisi_id}`;
+                if (!acc[key]) {
+                  acc[key] = {
+                    id: item.ders_ciktisi_id,
+                    cikti: item.ders_ciktisi,
+                  };
+                }
+                return acc;
+              }, {} as Record<string, DersCiktisi>);
 
-            return row;
+            const dersCiktilari = Object.values(
+              dersCiktilariMap
+            ) as DersCiktisi[];
+
+            // Add learning outcome rows for this student
+            dersCiktilari.forEach((dersCiktisi) => {
+              const row: any = {
+                ders_ciktisi_id: dersCiktisi.id,
+                ders_ciktisi: dersCiktisi.cikti,
+              };
+
+              let totalValue = 0;
+              let maxTotalValue = 0;
+
+              kriterler.forEach((kriter) => {
+                const match = ogrenciDersBasari.find(
+                  (item) =>
+                    item.ogrenci_no === student.ogrenci_no &&
+                    item.ders_ciktisi_id === dersCiktisi.id &&
+                    item.kriter_adi === kriter
+                );
+                if (match) {
+                  const value = Number(match.deger) || 0;
+                  const maxValue = Number(match.maxDeger) || 0;
+                  row[kriter] = value;
+                  totalValue += value * maxValue;
+                  maxTotalValue += maxValue;
+                } else {
+                  row[kriter] = 0;
+                }
+              });
+
+              row.total = totalValue;
+              row.max = maxTotalValue;
+              row.basariOrani =
+                maxTotalValue > 0 ? (totalValue / maxTotalValue) * 100 : 0;
+
+              data.push(row);
+            });
           });
 
           // Set up columns
@@ -466,14 +513,96 @@ const Tables: React.FC = () => {
         }
         break;
       case 4:
-        data = ogrenciProgramBasari;
-        columns = [
-          "Öğrenci No",
-          "Öğrenci Adı",
-          "Öğrenci Soyadı",
-          "Program Çıktısı",
-          "Başarı Oranı",
-        ];
+        if (ogrenciProgramBasari.length > 0) {
+          // First get unique ders çıktıları for columns
+          const dersCiktilari = Array.from(
+            new Set(ogrenciProgramBasari.map((item) => item.ders_ciktisi))
+          );
+
+          // Group data by student and program outcome
+          const groupedByStudent = ogrenciProgramBasari.reduce(
+            (acc: any, curr) => {
+              const studentKey = `${curr.ogrenci_no}`;
+              if (!acc[studentKey]) {
+                acc[studentKey] = {
+                  student: {
+                    ogrenci_no: curr.ogrenci_no,
+                    ogrenci_adi: curr.ogrenci_adi,
+                    ogrenci_soyadi: curr.ogrenci_soyadi,
+                  },
+                  dersCiktisiBasariOranlari: {},
+                  programOutcomes: {},
+                };
+              }
+
+              // Store ders çıktısı success rates at student level
+              if (
+                !acc[studentKey].dersCiktisiBasariOranlari[curr.ders_ciktisi]
+              ) {
+                acc[studentKey].dersCiktisiBasariOranlari[curr.ders_ciktisi] =
+                  curr.ders_ciktisi_basari_orani;
+              }
+
+              const programCiktisiKey = curr.program_ciktisi;
+              if (!acc[studentKey].programOutcomes[programCiktisiKey]) {
+                acc[studentKey].programOutcomes[programCiktisiKey] = {
+                  dersCiktisiBasariOranlari: {},
+                  programCiktisiBasariOrani: curr.program_ciktisi_basari_orani,
+                  ortalama_basari: curr.ortalama_basari,
+                };
+              }
+
+              // Store weighted success rate for each ders çıktısı
+              acc[studentKey].programOutcomes[
+                programCiktisiKey
+              ].dersCiktisiBasariOranlari[curr.ders_ciktisi] =
+                curr.weighted_success;
+
+              return acc;
+            },
+            {}
+          );
+
+          // Transform grouped data into rows
+          data = [];
+          Object.values(groupedByStudent).forEach((studentData: any) => {
+            // Add student header row with ders çıktısı success rates
+            data.push({
+              isHeader: true,
+              ...studentData.student,
+              dersCiktisiBasariOranlari: studentData.dersCiktisiBasariOranlari,
+            });
+
+            // Add program outcome rows
+            Object.entries(studentData.programOutcomes).forEach(
+              ([programCiktisi, outcomeData]: [string, any]) => {
+                const row: any = {
+                  program_ciktisi: programCiktisi,
+                };
+
+                // Add weighted success rate for each ders çıktısı
+                dersCiktilari.forEach((dersCiktisi) => {
+                  row[dersCiktisi] =
+                    outcomeData.dersCiktisiBasariOranlari[dersCiktisi] || 0;
+                });
+
+                // Add program outcome success rate and average
+                row.ortalama_basari = outcomeData.ortalama_basari;
+
+                data.push(row);
+              }
+            );
+
+            // Add empty row between students
+            data.push({ isEmpty: true });
+          });
+
+          columns = [
+            "Program Çıktısı",
+            ...dersCiktilari,
+            "Ortalama Başarı (%)",
+          ];
+        }
         break;
     }
 
@@ -489,7 +618,10 @@ const Tables: React.FC = () => {
           </TableHead>
           <TableBody>
             {data.map((row, index) => (
-              <TableRow key={index}>
+              <TableRow
+                key={index}
+                sx={row.isHeader ? { backgroundColor: "#f5f5f5" } : {}}
+              >
                 {activeTab === 0 ? (
                   <>
                     <TableCell>{row.program_ciktisi}</TableCell>
@@ -574,31 +706,87 @@ const Tables: React.FC = () => {
                     </TableCell>
                   </>
                 ) : activeTab === 3 ? (
+                  row.isHeader ? (
+                    <TableCell
+                      colSpan={columns.length}
+                      sx={{ fontWeight: "bold" }}
+                    >
+                      {`${row.ogrenci_no} - ${row.ogrenci_adi} ${row.ogrenci_soyadi}`}
+                    </TableCell>
+                  ) : (
+                    <>
+                      <TableCell>{row.ders_ciktisi}</TableCell>
+                      {columns.slice(1, -3).map((kriter, idx) => (
+                        <TableCell key={idx} align="center">
+                          {(row[kriter] * 100).toFixed(2)}%
+                        </TableCell>
+                      ))}
+                      <TableCell align="center">
+                        {(row.total * 100).toFixed(2)}%
+                      </TableCell>
+                      <TableCell align="center">
+                        {(row.max * 100).toFixed(2)}%
+                      </TableCell>
+                      <TableCell align="center">
+                        {row.basariOrani.toFixed(2)}%
+                      </TableCell>
+                    </>
+                  )
+                ) : row.isEmpty ? (
+                  <TableCell colSpan={columns.length} />
+                ) : row.isHeader ? (
                   <>
-                    <TableCell>{row.ders_ciktisi}</TableCell>
-                    {columns.slice(1, -3).map((kriter, idx) => (
+                    <TableCell
+                      sx={{
+                        backgroundColor: "#f5f5f5",
+                        fontWeight: "bold",
+                        borderBottom: "2px solid rgba(224, 224, 224, 1)",
+                      }}
+                    >
+                      {`${row.ogrenci_no} - ${row.ogrenci_adi} ${row.ogrenci_soyadi}`}
+                    </TableCell>
+                    {columns.slice(1, -1).map((dersCiktisi, idx) => (
+                      <TableCell
+                        key={idx}
+                        align="center"
+                        sx={{
+                          backgroundColor: "#f5f5f5",
+                          fontWeight: "bold",
+                          borderBottom: "2px solid rgba(224, 224, 224, 1)",
+                        }}
+                      >
+                        {row.dersCiktisiBasariOranlari[dersCiktisi]
+                          ? `${Number(
+                              row.dersCiktisiBasariOranlari[dersCiktisi]
+                            ).toFixed(2)}%`
+                          : "0.00%"}
+                      </TableCell>
+                    ))}
+                    <TableCell
+                      sx={{
+                        backgroundColor: "#f5f5f5",
+                        fontWeight: "bold",
+                        borderBottom: "2px solid rgba(224, 224, 224, 1)",
+                      }}
+                      align="center"
+                    />
+                  </>
+                ) : (
+                  <>
+                    <TableCell>{row.program_ciktisi}</TableCell>
+                    {columns.slice(1, -1).map((dersCiktisi, idx) => (
                       <TableCell key={idx} align="center">
-                        {Number(row[kriter] || 0).toFixed(2)}
+                        {typeof row[dersCiktisi] === "number"
+                          ? row[dersCiktisi].toFixed(2)
+                          : Number(row[dersCiktisi] || 0).toFixed(2)}
                       </TableCell>
                     ))}
                     <TableCell align="center">
-                      {Number(row.total || 0).toFixed(2)}
-                    </TableCell>
-                    <TableCell align="center">
-                      {Number(row.max || 0).toFixed(2)}
-                    </TableCell>
-                    <TableCell align="center">
-                      {Number(row.basariOrani || 0).toFixed(2)}%
+                      {typeof row.ortalama_basari === "number"
+                        ? row.ortalama_basari.toFixed(2)
+                        : Number(row.ortalama_basari || 0).toFixed(2)}
                     </TableCell>
                   </>
-                ) : (
-                  Object.values(row).map((value: any, cellIndex) => (
-                    <TableCell key={cellIndex}>
-                      {typeof value === "number"
-                        ? Number(value).toFixed(2)
-                        : value}
-                    </TableCell>
-                  ))
                 )}
               </TableRow>
             ))}
