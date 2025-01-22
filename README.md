@@ -1,8 +1,27 @@
-# EBS (Eğitim Bilgi Sistemi) API
+# EBS (Eğitim Bilgi Sistemi)
 
-Bu API, eğitim kurumları için program, ders, öğrenci ve değerlendirme yönetimi sağlar.
+Eğitim Bilgi Sistemi (EBS), eğitim kurumları için kapsamlı bir yönetim sistemidir. Bu sistem, program yönetimi, ders yönetimi, öğrenci takibi, not değerlendirme ve öğrenme çıktılarının yönetimini sağlar.
+
+## Teknoloji Stack'i
+
+### Backend
+
+- Node.js
+- Express.js
+- MySQL
+- JSON Web Token (JWT) authentication
+
+### Frontend
+
+- React
+- TypeScript
+- Axios
+- Material-UI
+- React Router
 
 ## Kurulum
+
+### Backend Kurulumu
 
 1. Gerekli paketleri yükleyin:
 
@@ -31,6 +50,54 @@ DB_NAME=ebs_db
 ```bash
 npm start
 ```
+
+### Frontend Kurulumu
+
+1. Client dizinine gidin:
+
+```bash
+cd client
+```
+
+2. Gerekli paketleri yükleyin:
+
+```bash
+npm install
+```
+
+3. Geliştirme sunucusunu başlatın:
+
+```bash
+npm start
+```
+
+Frontend uygulaması varsayılan olarak http://localhost:3000 adresinde çalışacaktır.
+
+## Özellikler
+
+- Program Yönetimi
+  - Program ekleme, düzenleme, silme
+  - Program detaylarını görüntüleme
+- Ders Yönetimi
+  - Ders ekleme, düzenleme, silme
+  - Ders detaylarını görüntüleme
+  - Derslere öğretim üyesi atama
+- Öğrenci Yönetimi
+  - Öğrenci ekleme, düzenleme, silme
+  - Öğrenci bilgilerini görüntüleme
+  - Öğrenci program ataması
+- Not Sistemi
+  - Not girişi (tekli ve toplu)
+  - Not düzenleme ve silme
+  - Excel ile toplu not yükleme
+- Değerlendirme Kriterleri
+  - Değerlendirme kriteri ekleme ve düzenleme
+  - Kriter bazlı not girişi
+  - Etki oranı belirleme
+- Öğrenme Çıktıları
+  - Program öğrenme çıktıları tanımlama
+  - Ders öğrenme çıktıları tanımlama
+  - Çıktı-değerlendirme ilişkilendirme
 
 ## API Endpointleri
 
