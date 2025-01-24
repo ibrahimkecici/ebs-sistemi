@@ -10,6 +10,17 @@ router.get(
   async (req, res) => {
     try {
       const dersId = req.params.dersId;
+      const [ders] = await pool.query(
+        `SELECT program_id FROM dersler WHERE id = ?`,
+        [dersId]
+      );
+
+      if (!ders || ders.length === 0) {
+        return res.status(404).json({ message: "Ders bulunamadı" });
+      }
+
+      const programId = ders[0].program_id;
+
       const [results] = await pool.query(
         `SELECT 
                 poc.id as program_ciktisi_id,
@@ -22,8 +33,8 @@ router.get(
             LEFT JOIN program_ders_ciktisi_iliskisi pdci 
                 ON pdci.program_ciktisi_id = poc.id 
                 AND pdci.ders_ciktisi_id = doc.id
-            WHERE doc.ders_id = ?`,
-        [dersId]
+            WHERE doc.ders_id = ? AND poc.program_id = ?`,
+        [dersId, programId]
       );
 
       res.json(results);
@@ -291,6 +302,17 @@ router.get(
   async (req, res) => {
     try {
       const dersId = req.params.dersId;
+      const [ders] = await pool.query(
+        `SELECT program_id FROM dersler WHERE id = ?`,
+        [dersId]
+      );
+
+      if (!ders || ders.length === 0) {
+        return res.status(404).json({ message: "Ders bulunamadı" });
+      }
+
+      const programId = ders[0].program_id;
+
       const [results] = await pool.query(
         `SELECT 
           poc.id as program_ciktisi_id,
@@ -303,8 +325,8 @@ router.get(
         LEFT JOIN program_ders_ciktisi_iliskisi pdci 
           ON pdci.program_ciktisi_id = poc.id 
           AND pdci.ders_ciktisi_id = doc.id
-        WHERE doc.ders_id = ?`,
-        [dersId]
+        WHERE doc.ders_id = ? AND poc.program_id = ?`,
+        [dersId, programId]
       );
 
       // Get unique ders çıktıları
