@@ -98,7 +98,7 @@ const Evaluations: React.FC = () => {
           _id: item.id.toString(),
           dersId: item.ders_id.toString(),
           kriterAdi: item.kriter_adi,
-          etkiOrani: parseFloat(item.etki_orani),
+          etkiOrani: parseFloat(item.etki_orani) * 100,
         })
       );
 
@@ -172,7 +172,7 @@ const Evaluations: React.FC = () => {
 
   const getTotalPercentage = () => {
     return evaluationCriteria.reduce(
-      (sum, criterion) => sum + criterion.etkiOrani * 100,
+      (sum, criterion) => sum + criterion.etkiOrani,
       0
     );
   };
@@ -231,7 +231,7 @@ const Evaluations: React.FC = () => {
                 {evaluationCriteria.map((criterion) => (
                   <TableRow key={criterion._id}>
                     <TableCell>{criterion.kriterAdi}</TableCell>
-                    <TableCell>{criterion.etkiOrani * 100}%</TableCell>
+                    <TableCell>{criterion.etkiOrani.toFixed(2)}%</TableCell>
                     <TableCell>
                       <IconButton
                         onClick={() => handleEdit(criterion)}
@@ -291,14 +291,21 @@ const Evaluations: React.FC = () => {
             label="Etki Oranı (%)"
             type="number"
             fullWidth
-            value={formData.etkiOrani * 100}
-            onChange={(e) =>
+            value={formData.etkiOrani}
+            onChange={(e) => {
+              console.log(typeof e.target.value, "tip");
               setFormData({
                 ...formData,
-                etkiOrani: parseFloat(e.target.value) / 100,
-              })
-            }
-            InputProps={{ inputProps: { min: 0, max: 100, step: 1 } }}
+                etkiOrani: Number(e.target.value),
+              });
+            }}
+            InputProps={{
+              inputProps: {
+                min: 0,
+                max: 100,
+                step: 1,
+              },
+            }}
           />
         </DialogContent>
         <DialogActions>

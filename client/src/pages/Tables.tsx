@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Container,
   Paper,
@@ -26,6 +26,7 @@ import {
 } from "@mui/material";
 import { FileDownload, Edit } from "@mui/icons-material";
 import axios from "../config/axios";
+import debounce from "lodash/debounce";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -53,6 +54,7 @@ const Tables: React.FC = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [selectedDersId, setSelectedDersId] = useState<string>("");
   const [selectedProgramId, setSelectedProgramId] = useState<string>("");
+  const [studentFilter, setStudentFilter] = useState<string>("");
   const [dersler, setDersler] = useState<any[]>([]);
   const [programlar, setProgramlar] = useState<any[]>([]);
   const [editModalOpen, setEditModalOpen] = useState(false);
@@ -96,6 +98,43 @@ const Tables: React.FC = () => {
     setActiveTab(newValue);
   };
 
+  // Create a debounced version of fetchTableData for both tables
+  const debouncedFetchData = useCallback(
+    debounce((filter: string) => {
+      if (activeTab === 3 && selectedDersId) {
+        axios
+          .get(`/ogrenciDersCiktisiBasariOraniTablosu/${selectedDersId}`, {
+            params: {
+              ogrenciNo: filter || undefined,
+            },
+          })
+          .then((response) => {
+            setOgrenciDersBasari(response.data);
+          })
+          .catch((error) => {
+            console.error("Error fetching filtered data:", error);
+          });
+      } else if (activeTab === 4 && selectedProgramId) {
+        axios
+          .get(
+            `/ogrenciProgramCiktisiBasariOraniTablosu/${selectedProgramId}`,
+            {
+              params: {
+                ogrenciNo: filter || undefined,
+              },
+            }
+          )
+          .then((response) => {
+            setOgrenciProgramBasari(response.data);
+          })
+          .catch((error) => {
+            console.error("Error fetching filtered data:", error);
+          });
+      }
+    }, 300),
+    [activeTab, selectedDersId, selectedProgramId]
+  );
+
   const fetchTableData = async () => {
     try {
       switch (activeTab) {
@@ -126,7 +165,12 @@ const Tables: React.FC = () => {
         case 3:
           if (selectedDersId) {
             const response = await axios.get(
-              `/ogrenciDersCiktisiBasariOraniTablosu/${selectedDersId}`
+              `/ogrenciDersCiktisiBasariOraniTablosu/${selectedDersId}`,
+              {
+                params: {
+                  ogrenciNo: studentFilter || undefined,
+                },
+              }
             );
             setOgrenciDersBasari(response.data);
           }
@@ -134,7 +178,12 @@ const Tables: React.FC = () => {
         case 4:
           if (selectedProgramId) {
             const response = await axios.get(
-              `/ogrenciProgramCiktisiBasariOraniTablosu/${selectedProgramId}`
+              `/ogrenciProgramCiktisiBasariOraniTablosu/${selectedProgramId}`,
+              {
+                params: {
+                  ogrenciNo: studentFilter || undefined,
+                },
+              }
             );
             setOgrenciProgramBasari(response.data);
           }
@@ -152,6 +201,8 @@ const Tables: React.FC = () => {
   const handleExport = async () => {
     try {
       let url = "";
+      let params = {};
+
       switch (activeTab) {
         case 0:
           url = `/programCiktisiDersCiktisiIliskisiExcel/${selectedDersId}`;
@@ -164,13 +215,23 @@ const Tables: React.FC = () => {
           break;
         case 3:
           url = `/ogrenciDersCiktisiBasariOraniExcel/${selectedDersId}`;
+          if (studentFilter) {
+            params = { ogrenciNo: studentFilter };
+          }
           break;
         case 4:
           url = `/ogrenciProgramCiktisiBasariOraniExcel/${selectedProgramId}`;
+          if (studentFilter) {
+            params = { ogrenciNo: studentFilter };
+          }
           break;
       }
 
-      const response = await axios.get(url, { responseType: "blob" });
+      const response = await axios.get(url, {
+        responseType: "blob",
+        params: params,
+      });
+
       const blob = new Blob([response.data], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       });
@@ -832,20 +893,51 @@ const Tables: React.FC = () => {
           )}
 
           {activeTab === 4 && (
-            <FormControl fullWidth>
-              <InputLabel>Program Seçiniz</InputLabel>
-              <Select
-                value={selectedProgramId}
-                label="Program Seçiniz"
-                onChange={(e) => setSelectedProgramId(e.target.value)}
-              >
-                {programlar.map((program) => (
-                  <MenuItem key={program._id} value={program._id}>
-                    {program.programAdi}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+            <>
+              <FormControl fullWidth>
+                <InputLabel>Program Seçiniz</InputLabel>
+                <Select
+                  value={selectedProgramId}
+                  label="Program Seçiniz"
+                  onChange={(e) => setSelectedProgramId(e.target.value)}
+                >
+                  {programlar.map((program) => (
+                    <MenuItem key={program._id} value={program._id}>
+                      {program.programAdi}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              <TextField
+                label="Öğrenci No"
+                value={studentFilter}
+                onChange={(e) => {
+                  const newValue = e.target.value.trim();
+                  setStudentFilter(newValue);
+                  debouncedFetchData(newValue);
+                }}
+                placeholder="Öğrenci numarası ile filtrele"
+                sx={{ minWidth: 200 }}
+                size="small"
+                variant="outlined"
+              />
+            </>
+          )}
+
+          {activeTab === 3 && (
+            <TextField
+              label="Öğrenci No"
+              value={studentFilter}
+              onChange={(e) => {
+                const newValue = e.target.value.trim();
+                setStudentFilter(newValue);
+                debouncedFetchData(newValue);
+              }}
+              placeholder="Öğrenci numarası ile filtrele"
+              sx={{ minWidth: 200 }}
+              size="small"
+              variant="outlined"
+            />
           )}
 
           <Button

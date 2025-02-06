@@ -110,6 +110,16 @@ router.get(
   async (req, res) => {
     try {
       const dersId = req.params.dersId;
+      const ogrenciNo = req.query.ogrenciNo;
+
+      let studentFilter = "";
+      let studentParams = [dersId];
+
+      if (ogrenciNo) {
+        studentFilter = "AND o.ogrenci_no = ?";
+        studentParams.push(ogrenciNo);
+      }
+
       const [results] = await pool.query(
         `WITH OgrenciDersNotlari AS (
           SELECT DISTINCT
@@ -119,7 +129,7 @@ router.get(
           FROM ogrenciler o
           JOIN notlar n ON n.ogrenci_no = o.ogrenci_no
           JOIN degerlendirme_kriterleri dk ON dk.id = n.kriter_id
-          WHERE dk.ders_id = ?
+          WHERE dk.ders_id = ? ${studentFilter}
         ),
         DersCiktilariVeKriterler AS (
           SELECT 
@@ -179,7 +189,7 @@ router.get(
           ogrenci_no, 
           ders_ciktisi_id, 
           kriter_adi`,
-        [dersId, dersId]
+        [...studentParams, dersId]
       );
 
       res.json(results);
@@ -196,6 +206,16 @@ router.get(
   async (req, res) => {
     try {
       const programId = req.params.programId;
+      const ogrenciNo = req.query.ogrenciNo;
+
+      let studentFilter = "";
+      let studentParams = [programId, programId];
+
+      if (ogrenciNo) {
+        studentFilter = "AND o.ogrenci_no = ?";
+        studentParams.push(ogrenciNo);
+      }
+
       const [results] = await pool.query(
         `WITH AllCombinations AS (
           SELECT 
@@ -207,7 +227,7 @@ router.get(
           FROM ogrenciler o
           CROSS JOIN ders_ogrenme_ciktilari doc
           JOIN dersler d ON d.id = doc.ders_id AND d.program_id = ?
-          WHERE o.program_id = ?
+          WHERE o.program_id = ? ${studentFilter}
         ),
         DersCiktisiBasariOranlari AS (
           SELECT 
@@ -276,7 +296,7 @@ router.get(
           pcbo.ogrenci_no,
           pcbo.program_ciktisi,
           pcbo.ders_ciktisi`,
-        [programId, programId, programId]
+        [...studentParams, programId]
       );
 
       res.json(results);
@@ -586,6 +606,16 @@ router.get("/dersAgirlikliDegerlendirmeExcel/:dersId", async (req, res) => {
 router.get("/ogrenciDersCiktisiBasariOraniExcel/:dersId", async (req, res) => {
   try {
     const dersId = req.params.dersId;
+    const ogrenciNo = req.query.ogrenciNo;
+
+    let studentFilter = "";
+    let studentParams = [dersId];
+
+    if (ogrenciNo) {
+      studentFilter = "AND o.ogrenci_no = ?";
+      studentParams.push(ogrenciNo);
+    }
+
     const [results] = await pool.query(
       `WITH OgrenciDersNotlari AS (
         SELECT DISTINCT
@@ -595,7 +625,7 @@ router.get("/ogrenciDersCiktisiBasariOraniExcel/:dersId", async (req, res) => {
         FROM ogrenciler o
         JOIN notlar n ON n.ogrenci_no = o.ogrenci_no
         JOIN degerlendirme_kriterleri dk ON dk.id = n.kriter_id
-        WHERE dk.ders_id = ?
+        WHERE dk.ders_id = ? ${studentFilter}
       ),
       DersCiktilariVeKriterler AS (
         SELECT 
@@ -661,7 +691,7 @@ router.get("/ogrenciDersCiktisiBasariOraniExcel/:dersId", async (req, res) => {
         ogrenci_no, 
         ders_ciktisi_id, 
         kriter_adi`,
-      [dersId, dersId]
+      [...studentParams, dersId]
     );
 
     // Get unique değerlendirme kriterleri for columns
@@ -811,6 +841,16 @@ router.get(
   async (req, res) => {
     try {
       const programId = req.params.programId;
+      const ogrenciNo = req.query.ogrenciNo;
+
+      let studentFilter = "";
+      let studentParams = [programId, programId];
+
+      if (ogrenciNo) {
+        studentFilter = "AND o.ogrenci_no = ?";
+        studentParams.push(ogrenciNo);
+      }
+
       const [results] = await pool.query(
         `WITH AllCombinations AS (
           SELECT 
@@ -822,7 +862,7 @@ router.get(
           FROM ogrenciler o
           CROSS JOIN ders_ogrenme_ciktilari doc
           JOIN dersler d ON d.id = doc.ders_id AND d.program_id = ?
-          WHERE o.program_id = ?
+          WHERE o.program_id = ? ${studentFilter}
         ),
         DersCiktisiBasariOranlari AS (
           SELECT 
@@ -891,7 +931,7 @@ router.get(
           pcbo.ogrenci_no,
           pcbo.program_ciktisi,
           pcbo.ders_ciktisi`,
-        [programId, programId, programId]
+        [...studentParams, programId]
       );
 
       // Get unique ders çıktıları for columns

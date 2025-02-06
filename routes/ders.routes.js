@@ -132,20 +132,27 @@ router.delete("/dersSil/:id", async (req, res) => {
 // Dersleri Listele
 router.get("/dersler", async (req, res) => {
   try {
-    const [dersler] = await pool.query(
-      `SELECT 
-        d.id as _id,
-        d.program_id as programId,
-        d.ders_adi as dersAdi,
-        d.ders_kodu as dersKodu,
-        d.fakulte,
-        d.ogretim_duzeyi as ogretimDuzeyi,
-        d.kredi,
-        d.ogretim_uyesi as ogretimUyesi,
-        p.program_adi as programAdi
-      FROM dersler d
-      JOIN programlar p ON d.program_id = p.id`
-    );
+    const programId = req.query.programId;
+    let query = `SELECT 
+      d.id as _id,
+      d.program_id as programId,
+      d.ders_adi as dersAdi,
+      d.ders_kodu as dersKodu,
+      d.fakulte,
+      d.ogretim_duzeyi as ogretimDuzeyi,
+      d.kredi,
+      d.ogretim_uyesi as ogretimUyesi,
+      p.program_adi as programAdi
+    FROM dersler d
+    JOIN programlar p ON d.program_id = p.id`;
+
+    const params = [];
+    if (programId) {
+      query += " WHERE d.program_id = ?";
+      params.push(programId);
+    }
+
+    const [dersler] = await pool.query(query, params);
     console.log("Fetched courses:", dersler);
     res.json(dersler);
   } catch (error) {

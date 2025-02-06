@@ -7,7 +7,7 @@ const { body, validationResult } = require("express-validator");
 const validateDegerlendirmeKriteri = [
   body("dersId").isInt(),
   body("kriterAdi").notEmpty().trim(),
-  body("etkiOrani").isFloat({ min: 0, max: 1 }),
+  body("etkiOrani").isFloat({ min: 0, max: 100 }),
 ];
 
 // Değerlendirme Kriteri Ekle
@@ -26,7 +26,7 @@ router.post(
       // Insert new evaluation criteria
       const [result] = await pool.query(
         "INSERT INTO degerlendirme_kriterleri (ders_id, kriter_adi, etki_orani) VALUES (?, ?, ?)",
-        [dersId, kriterAdi, etkiOrani]
+        [dersId, kriterAdi, (etkiOrani / 100).toFixed(2)]
       );
 
       res.status(201).json({
@@ -56,7 +56,7 @@ router.put(
 
       const [result] = await pool.query(
         "UPDATE degerlendirme_kriterleri SET ders_id = ?, kriter_adi = ?, etki_orani = ? WHERE id = ?",
-        [dersId, kriterAdi, etkiOrani, kriterId]
+        [dersId, kriterAdi, (etkiOrani / 100).toFixed(2), kriterId]
       );
 
       if (result.affectedRows === 0) {
