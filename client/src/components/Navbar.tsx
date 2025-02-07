@@ -10,6 +10,7 @@ import {
   ListItemIcon,
   ListItemText,
   IconButton,
+  Box,
 } from "@mui/material";
 import {
   School,
@@ -49,9 +50,10 @@ const Navbar: React.FC = () => {
       <List>
         {menuItems.map((item) => (
           <ListItem
+            button
+            key={item.text}
             onClick={() => navigate(item.path)}
             selected={location.pathname === item.path}
-            sx={{ cursor: "pointer" }}
           >
             <ListItemIcon>{item.icon}</ListItemIcon>
             <ListItemText primary={item.text} />
@@ -65,7 +67,11 @@ const Navbar: React.FC = () => {
     <>
       <AppBar
         position="fixed"
-        sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        sx={{
+          zIndex: (theme) => theme.zIndex.drawer + 1,
+          width: "100%",
+          bgcolor: "#03823c",
+        }}
       >
         <Toolbar>
           <IconButton
@@ -77,41 +83,58 @@ const Navbar: React.FC = () => {
           >
             <MenuIcon />
           </IconButton>
+          <Box
+            component="img"
+            sx={{
+              height: 40,
+              width: 40,
+              marginRight: 2,
+            }}
+            alt="EBS Logo"
+            src="/logo192.png"
+          />
           <Typography variant="h6" noWrap component="div">
-            EBS Sistemi
+            Eğitim Bilgi Sistemi
           </Typography>
         </Toolbar>
       </AppBar>
-      <Drawer
-        variant="permanent"
-        sx={{
-          display: { xs: "none", sm: "block" },
-          "& .MuiDrawer-paper": {
-            boxSizing: "border-box",
-            width: drawerWidth,
-          },
-        }}
-        open
+      <Box
+        component="nav"
+        sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
       >
-        {drawer}
-      </Drawer>
-      <Drawer
-        variant="temporary"
-        open={mobileOpen}
-        onClose={handleDrawerToggle}
-        ModalProps={{
-          keepMounted: true,
-        }}
-        sx={{
-          display: { xs: "block", sm: "none" },
-          "& .MuiDrawer-paper": {
-            boxSizing: "border-box",
-            width: drawerWidth,
-          },
-        }}
-      >
-        {drawer}
-      </Drawer>
+        <Drawer
+          variant="temporary"
+          open={mobileOpen}
+          onClose={handleDrawerToggle}
+          ModalProps={{
+            keepMounted: true,
+          }}
+          sx={{
+            display: { xs: "block", sm: "none" },
+            "& .MuiDrawer-paper": {
+              boxSizing: "border-box",
+              width: drawerWidth,
+            },
+          }}
+        >
+          {drawer}
+        </Drawer>
+        <Drawer
+          variant="permanent"
+          sx={{
+            display: { xs: "none", sm: "block" },
+            "& .MuiDrawer-paper": {
+              boxSizing: "border-box",
+              width: drawerWidth,
+              top: 64,
+              height: "calc(100% - 64px)",
+            },
+          }}
+          open
+        >
+          {drawer}
+        </Drawer>
+      </Box>
     </>
   );
 };
